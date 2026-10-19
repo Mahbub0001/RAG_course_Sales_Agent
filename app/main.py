@@ -10,3 +10,11 @@ async def health(settings:Settings=Depends(get_settings))->dict[str,str]:
         "app name":settings.APP_NAME
 
     }
+
+@app.get("/helth/db")
+async def health_db(session:AsyncSession=Depends(get_settings))->dict[str,str]:
+    try:
+        await session.execute("SELECT 1")
+        return {"status":"ok"}
+    except Exception as e:
+        return {"status":"error", "message":str(e)}

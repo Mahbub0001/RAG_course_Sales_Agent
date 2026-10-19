@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import SecretStr
 from functools import lru_cache
 from sqlalchemy.engine import URL
 class Settings(BaseSettings):
@@ -8,19 +9,19 @@ class Settings(BaseSettings):
     DB_HOST: str="localhost"
     DB_PORT: int=5432
     DB_USER: str="postgres"
-    DB_PASSWORD: str="54wx9vdn"
+    DB_PASSWORD: SecretStr="54wx9vdn"
     DB_NAME: str="sales-agent-db"
     
-    @proterty
+    @property
     def DATABASE_URL(self) -> URL:
         return URL.create(
             drivername="postgresql+psycopg2",
             username=self.DB_USER,
-            password=self.DB_PASSWORD,
+            password=self.DB_PASSWORD.get_secret_value(),
             host=self.DB_HOST,
             port=self.DB_PORT,
             database=self.DB_NAME,
-            query={"options":{f"-c search_path={self.DB_SCHEMA}"}}
+            query={"options": f"-c search_path={self.DB_SCHEMA}"}
         )
 
     model_config= SettingsConfigDict(
